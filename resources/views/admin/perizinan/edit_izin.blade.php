@@ -34,12 +34,12 @@
          <input type="datetime-local" name="waktu_kembali" value="{{ $izin->waktu_kembali }}" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" required>
       </div>
 
-      <div class="input-group">
-         <label for="status">Status Izin</label>
-         <select name="status" id="status" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
-            <option value="menunggu" {{ $izin->status == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-            <option value="boleh" {{ $izin->status == 'boleh' ? 'selected' : '' }}>Disetujui (Boleh)</option>
-            <option value="tidak" {{ $izin->status == 'tidak' ? 'selected' : '' }}>Ditolak (Tidak)</option>
+      <div style="margin-bottom: 15px;">
+         <label for="status_kembali" style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px;">Status Kembali</label>
+         <select class="form-select" id="status_kembali" name="status_kembali" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
+            <option value="belum kembali" {{ (isset($izin) && $izin->status_kembali == 'belum kembali') ? 'selected' : '' }}>Belum Kembali</option>
+            <option value="tepat waktu" {{ (isset($izin) && $izin->status_kembali == 'tepat waktu') ? 'selected' : '' }}>Tepat Waktu</option>
+            <option value="telat" {{ (isset($izin) && $izin->status_kembali == 'telat') ? 'selected' : '' }}>Telat</option>
          </select>
       </div>
 

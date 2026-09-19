@@ -6,6 +6,8 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>@yield('title', 'e-Daruttauhid')</title>
    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css">
+   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
    <style>
       * {
          box-sizing: border-box;
@@ -120,12 +122,16 @@
          color: white;
       }
 
-      .sidebar-footer a.logout {
+      .sidebar-footer a {
          color: #ef4444;
       }
 
-      .sidebar-footer a.logout:hover {
-         background-color: rgba(239, 68, 68, 0.1);
+      .sidebar-footer .logout {
+         background-color: #022c22;
+      }
+
+      .sidebar-footer .logout:hover {
+         background-color: #064e3b;
       }
 
       /* Main Content & Header */
@@ -303,11 +309,27 @@
    <!-- Sidebar Admin -->
    <div class="sidebar">
       <div class="sidebar-header">
-         <div class="icon">🛡️</div>
+         @auth
+         @if(auth()->user()->role == 'super_admin')
+         <div class="icon"><i class="fa-solid fa-user-shield"></i></div>
+         <div class="logo-text">
+            <h2>Super Admin</h2>
+            <p>Operational Panel</p>
+         </div>
+         @elseif(auth()->user()->role == 'admin')
+         <div class="icon"><i class="fa-solid fa-user-shield"></i></div>
          <div class="logo-text">
             <h2>Admin</h2>
             <p>Operational Panel</p>
          </div>
+         @else(auth()->user()->role == 'santri')
+         <div class="icon"><i class="fa-solid fa-user-graduate"></i></div>
+         <div class="logo-text">
+            <h2>Santri</h2>
+            <p>Operational Panel</p>
+         </div>
+         @endif
+         @endauth
       </div>
       <ul class="sidebar-menu">
          <ul class="sidebar-menu">
@@ -316,42 +338,42 @@
             <!-- MENU KHUSUS SUPER ADMIN                    -->
             <!-- ========================================== -->
             @if(auth()->user()->role == 'super_admin')
-            <li><a href="/super-admin/dashboard" class="{{ Request::is('super-admin/dashboard') ? 'active' : '' }}">📊 Dashboard Utama</a></li>
-            <li><a href="#">📋 Monitoring Absensi</a></li>
-            <li><a href="/perizinan/dashboard" class="{{ Request::is('perizinan/dashboard') ? 'active' : '' }}">📂 Semua Perizinan</a></li>
-            <li><a href="#">👥 Master Data Santri</a></li>
-            <li><a href="#">🛏️ Master Data Kamar</a></li>
-            <li><a href="#">📅 Master Kegiatan</a></li>
-            <li><a href="#">⚙️ Manajemen User</a></li>
+            <li><a href="/super-admin/dashboard" class="{{ Request::is('super-admin/dashboard') ? 'active' : '' }}"><i class="fa-solid fa-chart-area"></i> Dashboard Utama</a></li>
+            <li><a href="#"><i class="fa-regular fa-clipboard"></i> Monitoring Absensi</a></li>
+            <li><a href="/perizinan/dashboard" class="{{ Request::is('perizinan/dashboard') ? 'active' : '' }}"><i class="bx bx-folder-open"></i> Semua Perizinan</a></li>
+            <li><a href="#"><i class="bx bx-group"></i> Master Data Santri</a></li>
+            <li><a href="#"><i class="fa-solid fa-bed"></i> Master Data Kamar</a></li>
+            <li><a href="#"><i class="fa-solid fa-alarm-clock"></i> Master Kegiatan</a></li>
+            <li><a href="#"><i class="fa-solid fa-users-gear"></i> Manajemen User</a></li>
 
             <!-- ========================================== -->
             <!-- MENU KHUSUS ADMIN (Operasional)            -->
             <!-- ========================================== -->
             @elseif(auth()->user()->role == 'admin')
-            <li><a href="/perizinan/dashboard-utama" class="{{ Request::is('perizinan/dashboard-utama') ? 'active' : '' }}">📊 Dashboard Admin</a></li>
-            <li><a href="#">📋 Sesi Absensi Pondok</a></li>
-            <li><a href="/perizinan/dashboard" class="{{ Request::is('perizinan/dashboard') ? 'active' : '' }}">📂 Kelola Perizinan</a></li>
-            <li><a href="#">👥 Lihat Data Santri</a></li>
+            <li><a href="/perizinan/dashboard-utama" class="{{ Request::is('perizinan/dashboard-utama') ? 'active' : '' }}"><i class="fa-solid fa-chart-area"></i> Dashboard Admin</a></li>
+            <li><a href="#"><i class="fa-regular fa-clipboard"></i> Sesi Absensi Pondok</a></li>
+            <li><a href="/perizinan/dashboard" class="{{ Request::is('perizinan/dashboard') ? 'active' : '' }}"><i class="bx bx-folder-open"></i> Kelola Perizinan</a></li>
+            <li><a href="#"><i class="bx bx-group"></i> Lihat Data Santri</a></li>
 
             <!-- ========================================== -->
             <!-- MENU KHUSUS SANTRI                         -->
             <!-- ========================================== -->
             @elseif(auth()->user()->role == 'santri')
-            <li><a href="/santri/dashboard" class="{{ Request::is('santri/dashboard') ? 'active' : '' }}">🏠 Dashboard Saya</a></li>
-            <li><a href="#">📋 Riwayat Absensi</a></li>
-            <li><a href="#">📂 Status Perizinan</a></li>
-            <li><a href="#">📅 Jadwal Kegiatan</a></li>
+            <li><a href="/santri/dashboard" class="{{ Request::is('santri/dashboard') ? 'active' : '' }}"><i class="fa-solid fa-id-card"></i> Dashboard Saya</a></li>
+            <li><a href="#"><i class="fa-regular fa-clipboard"></i> Riwayat Absensi</a></li>
+            <li><a href="#"><i class="fa-solid fa-folder"></i> Status Perizinan</a></li>
+            <li><a href="#"><i class="fa-solid fa-alarm-clock"></i> Jadwal Kegiatan</a></li>
             @endif
             @endauth
          </ul>
       </ul>
 
       <div class="sidebar-footer">
-         <a href="#" class="settings">⚙️ Settings</a>
+         <a href="#" class="settings"><i class="bx bx-cog"></i> Settings</a>
          <form action="/logout" method="POST" style="margin: 0;">
             @csrf
-            <button type="submit" class="logout" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 15px; font-size: 0.95rem; font-weight: 500; border-radius: 8px; color: #ef4444;">
-               🚪 Log out
+            <button type="submit" class="logout" style=" border: none; width: 100%; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 15px; font-size: 0.95rem; font-weight: 500; border-radius: 8px; color: #ef4444;">
+               <div><i class="fa-solid fa-right-from-bracket"></i></div> Log out
             </button>
          </form>
       </div>
@@ -364,14 +386,14 @@
          <!-- Pencarian -->
          <div class="header-search">
             <div class="search-box">
-               <span>🔍</span>
+               <span><i class="fa-solid fa-magnifying-glass"></i></span>
                <input type="text" placeholder="Cari santri, kamar, atau laporan...">
             </div>
          </div>
 
          <!-- Profil & Notifikasi -->
          <div class="header-right">
-            <span class="notification-icon">🔔</span>
+            <span class="notification-icon"><i class="fa fa-bell" style="color:#000000; font-size:26px;"></i></span>
             <div class="user-profile">
                <div class="user-info">
                   <span class="name">{{ auth()->user()->nama ?? auth()->user()->username }}</span>

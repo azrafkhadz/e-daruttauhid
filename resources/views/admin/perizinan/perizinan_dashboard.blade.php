@@ -2,13 +2,19 @@
 
 @section('content')
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-   <h2 style="font-size: 20px; color: #111827; font-weight: 600;">Daftar Pengajuan Izin Santri</h2>
-   <a href="/perizinan/pengajuan" style="background: #16a34a; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">Ajukan Izin</a>
+   <h2 style="font-size: 20px; color: #111827; font-weight: 600;">Daftar Perizinan Santri</h2>
+   <div class="d-flex justify-content-end mb-3 gap-2">
+      <a href="/perizinan/riwayat" class="btn btn-secondary">
+         Riwayat Perizinan
+      </a>
+      <a href="/perizinan/pengajuan" class="btn btn-success">
+         Ajukan Izin
+      </a>
+   </div>
 </div>
 
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px;">
 
-   <!-- Card 1: Total Pengajuan -->
    <div style="background: white; padding: 20px 24px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
          <span style="font-size: 12px; font-weight: 600; color: #6b7280; letter-spacing: 0.5px; text-transform: uppercase;">Total Pengajuan</span>
@@ -19,7 +25,6 @@
       <h3 style="font-size: 28px; font-weight: 700; color: #111827;">{{ \App\Models\Izin::count() }}</h3>
    </div>
 
-   <!-- Card 2: Menunggu Persetujuan -->
    <div style="background: white; padding: 20px 24px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
          <span style="font-size: 12px; font-weight: 600; color: #6b7280; letter-spacing: 0.5px; text-transform: uppercase;">Menunggu Persetujuan</span>
@@ -30,7 +35,6 @@
       <h3 style="font-size: 28px; font-weight: 700; color: #d97706;">{{ \App\Models\Izin::where('status', 'menunggu')->count() }}</h3>
    </div>
 
-   <!-- Card 3: Disetujui -->
    <div style="background: white; padding: 20px 24px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
          <span style="font-size: 12px; font-weight: 600; color: #6b7280; letter-spacing: 0.5px; text-transform: uppercase;">Disetujui</span>

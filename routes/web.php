@@ -29,6 +29,8 @@ Route::prefix('perizinan')->group(function () {
     // Edit & Update Izin
     Route::get('/izin/edit/{id}', [IzinController::class, 'edit']);
     Route::post('/izin/update/{id}', [IzinController::class, 'update']);
+    // Riwayat Perizinan Keseluruhan
+    Route::get('/riwayat', [IzinController::class, 'history']);
 });
 
 // Webhook Telegram (Dibiarkan di luar prefix agar bot Telegram mudah mengaksesnya)

@@ -21,10 +21,24 @@ class IzinController extends Controller
          ->where('waktu_kembali', '<', now())
          ->update(['status_kembali' => 'telat']);
 
-      // Ambil semua data izin beserta relasi nama santrinya
-      $semuaIzin = Izin::with('santri.user')->get();
+      $izinAktif = Izin::with('santri.user')
+         ->where('status', '!=', 'tidak') // Sembunyikan yang ditolak
+         ->where(function ($query) {
+            $query->whereNull('status_kembali')
+               ->orWhere('status_kembali', 'belum kembali')
+               ->orWhere('status_kembali', 'telat');
+         })
+         ->orderBy('created_at', 'desc')
+         ->get();
 
-      return view('admin.perizinan.perizinan_dashboard', ['dataIzin' => $semuaIzin]);
+      return view('admin.perizinan.perizinan_dashboard', ['dataIzin' => $izinAktif]);
+   }
+
+   public function history()
+   {
+      $semuaIzin = Izin::with('santri.user')->orderBy('created_at', 'desc')->get();
+
+      return view('admin.perizinan.riwayat_izin', ['dataIzin' => $semuaIzin]);
    }
 
    // Fungsi baru untuk menampilkan form pengajuan dengan pilihan nama santri
@@ -81,9 +95,6 @@ class IzinController extends Controller
       return view('admin.perizinan.sukses');
    }
 
-   // ==============================================================
-   // FUNGSI WEBHOOK TELEGRAM
-   // ==============================================================
    public function webhook(Request $request)
    {
       $update = $request->all();
@@ -92,47 +103,56 @@ class IzinController extends Controller
 
       if (isset($update['callback_query'])) {
          $callbackQuery = $update['callback_query'];
-         $chatIdSB = $callbackQuery['message']['chat']['id']; // ID Shohibul Bait
-         $data = $callbackQuery['data']; // Harus berisi format: setuju_1 atau tolak_1
+         $chatIdSB = $callbackQuery['message']['chat']['id'];
+         $data = $callbackQuery['data'];
+         $messageId = $callbackQuery['message']['message_id'];
 
-         // Pecah data untuk mendapatkan aksi dan ID Izin
          $parts = explode('_', $data);
          $action = $parts[0];
          $izinId = $parts[1] ?? null;
 
          if ($izinId) {
-            // Cari data izin di database
             $izin = \App\Models\Izin::with('santri.user')->find($izinId);
 
             if ($izin) {
                $namaSantri = $izin->santri->user->nama ?? 'Santri';
 
+               if ($izin->status !== 'menunggu') {
+                  \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
+                     'callback_query_id' => $callbackQuery['id'],
+                     'text' => '⚠️ Keputusan sudah final dan tidak bisa diubah lagi!',
+                     'show_alert' => true
+                  ]);
+                  return response('OK', 200);
+               }
+
                if ($action === 'izinkan') {
-                  // 1. Update status di database
                   $izin->status = 'boleh';
                   $izin->save();
 
-                  // 2. Balas ke Shohibul Bait
                   $this->kirimPesanTelegram($chatIdSB, "✅ Izin untuk ananda *$namaSantri* telah disetujui.");
 
-                  // 3. Kirim QR Code ke Grup Gerbang
                   $qrData = "IZIN-" . $izin->id;
                   $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($qrData);
-                  $captionGerbang = "🔔 *IZIN BARU DISETUJUI*\n\nNama: *$namaSantri*\nKeperluan: {$izin->keperluan}\nBerangkat: {$izin->waktu_berangkat}\nBatas Kembali: {$izin->waktu_kembali}\n\nSilakan scan QR Code ini di pos gerbang.";
+                  $captionGerbang = "🔔 *IZIN BARU DISETUJUI*\n\nNama: *$namaSantri*\nKeperluan: {$izin->keperluan}\nBerangkat: {$izin->waktu_berangkat}\nBatas Kembali: {$izin->waktu_kembali}\n\n*Tanda Bukti Izin!*.";
 
                   if ($idGrupGerbang) {
                      $this->kirimFotoTelegram($idGrupGerbang, $qrUrl, $captionGerbang);
                   }
                } elseif ($action === 'tolak') {
-                  // Jika ditolak
                   $izin->status = 'tidak';
                   $izin->save();
                   $this->kirimPesanTelegram($chatIdSB, "❌ Izin untuk ananda *$namaSantri* telah ditolak.");
                }
+
+               \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$token}/editMessageReplyMarkup", [
+                  'chat_id' => $chatIdSB,
+                  'message_id' => $messageId,
+                  'reply_markup' => json_encode(['inline_keyboard' => []]) // Mengosongkan tombol
+               ]);
             }
          }
 
-         // Hapus ikon loading pada tombol Telegram
          \Illuminate\Support\Facades\Http::post("https://api.telegram.org/bot{$token}/answerCallbackQuery", [
             'callback_query_id' => $callbackQuery['id']
          ]);
@@ -153,7 +173,7 @@ class IzinController extends Controller
          'parse_mode' => 'Markdown'
       ]);
       // Catat respons dari Telegram ke log
-      \Illuminate\Support\Facades\Log::info("Respons Pesan ($chatId): " . $response->body());
+      ("Respons Pesan ($chatId): " . $response->body());
    }
 
    private function kirimFotoTelegram($chatId, $photoUrl, $caption)
@@ -165,8 +185,7 @@ class IzinController extends Controller
          'caption' => $caption,
          'parse_mode' => 'Markdown'
       ]);
-      // Catat respons dari Telegram ke log
-      \Illuminate\Support\Facades\Log::info("Respons Foto ($chatId): " . $response->body());
+      ("Respons Foto ($chatId): " . $response->body());
    }
    public function konfirmasiKembali($id)
    {
